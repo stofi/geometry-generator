@@ -1,7 +1,7 @@
 # game-module
 
-## 0.1.0
+## 0.0.2
 
-### Minor Changes
+### Patch Changes
 
-- 6c2f6ec: change exports
+- Initial version
