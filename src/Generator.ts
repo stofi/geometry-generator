@@ -1,61 +1,19 @@
 import * as THREE from 'three'
 import { v4 as uuidv4 } from 'uuid'
 
-export class Vertex {
-    uuid = uuidv4()
+import Quad from './Quad'
+import Triangle from './Triangle'
+import Vertex from './Vertex'
 
-    constructor(
-        public readonly position: THREE.Vector3,
-        public readonly normal: THREE.Vector3,
-        public uv: THREE.Vector2 = new THREE.Vector2(0, 0),
-        public color: THREE.Color = new THREE.Color(1, 1, 1),
-        public faceIndex: number = 0
-    ) {}
 
-    setColor(color: THREE.Color) {
-        this.color = color
-    }
-
-    destroy() {
-        //
-    }
-}
-
-export class Triangle {
-    uuid = uuidv4()
-    constructor(
-        public readonly a: Vertex,
-        public readonly b: Vertex,
-        public readonly c: Vertex
-    ) {}
-
-    setColor(color: THREE.Color) {
-        this.a.setColor(color)
-        this.b.setColor(color)
-        this.c.setColor(color)
-    }
-
-    destroy() {
-        this.a.destroy()
-        this.b.destroy()
-        this.c.destroy()
-    }
-}
-
-export class Quad {
-    uuid = uuidv4()
-
-    constructor(public readonly ABC: Triangle, public readonly DEF: Triangle) {}
-
-    setColor(color: THREE.Color) {
-        this.ABC.setColor(color)
-        this.DEF.setColor(color)
-    }
-
-    destroy() {
-        this.ABC.destroy()
-        this.DEF.destroy()
-    }
+interface GeometryGeneratorData {
+    positions: Float32Array
+    normals: Float32Array
+    indices: Uint32Array
+    uvs: Float32Array
+    colors: Float32Array
+    count: number
+    faceIndices: Uint32Array
 }
 
 export default class GeometryGenerator {
@@ -64,17 +22,9 @@ export default class GeometryGenerator {
     quads: Record<string, Quad> = {}
     dirty = false
     faceCount = 0
-    _data: {
-        positions: Float32Array
-        normals: Float32Array
-        indices: Uint32Array
-        uvs: Float32Array
-        colors: Float32Array
-        count: number
-        faceIndices: Uint32Array
-    } | null = null
+    _data: GeometryGeneratorData | null = null
 
-    addTriangle(a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3) {
+    addTriangle(a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3): Triangle {
         this.dirty = true
         const normal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
 
@@ -89,6 +39,8 @@ export default class GeometryGenerator {
         this.vertices[vertexC.uuid] = vertexC
 
         this.triangles[triangle.uuid] = triangle
+
+        return triangle
     }
 
     addQuad(
@@ -97,7 +49,7 @@ export default class GeometryGenerator {
         c: THREE.Vector3,
         d: THREE.Vector3,
         uvs?: [THREE.Vector2, THREE.Vector2, THREE.Vector2, THREE.Vector2]
-    ) {
+    ): Quad {
         this.dirty = true
 
         const normal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
@@ -150,17 +102,71 @@ export default class GeometryGenerator {
 
         this.quads[quad.uuid] = quad
         this.faceCount += 1
+
         return quad
+    }
+
+    join(a: Quad, b: Quad) {
+        if (!Quad.areInSamePlane(a, b)) {
+            throw new Error('Quads must be in the same plane to join them')
+        }
+
+        const sharedEdge = Quad.sharedEdge(a, b)
+        if (sharedEdge === null) {
+            throw new Error('Quads must share an edge to join them')
+        }
+
+        const [a1, a2, a3, a4] = a.vertices
+        const [b1, b2, b3, b4] = b.vertices
+
+        const allVertices = [a1, a2, a3, a4, b1, b2, b3, b4]
+
+        const [v1, v2] = sharedEdge
+
+        const otherVertices = allVertices.filter((v) => v !== v1 && v !== v2)
+
+
+        // there should be 4 other vertices
+        if (otherVertices.length !== 4) {
+            throw new Error('Quads must share an edge to join them')
+        }
+
+        const [v3, v4, v5, v6] = otherVertices as [Vertex, Vertex, Vertex, Vertex]
+
+        const newVertexA = v3
+        const newVertexB = v4
+        const newVertexC = v5
+        const newVertexD = v3
+        const newVertexE = v5
+        const newVertexF = v6
+
+
+        this.removeQuad(a)
+        this.removeQuad(b)
+
+        this.addQuad(newVertexA.position, newVertexB.position, newVertexC.position, newVertexF.position)
+    }
+
+    removeQuad(quad: Quad) {
+        this.dirty = true
+        delete this.quads[quad.uuid]
+        delete this.triangles[quad.ABC.uuid]
+        delete this.triangles[quad.DEF.uuid]
+        delete this.vertices[quad.ABC.A.uuid]
+        delete this.vertices[quad.ABC.B.uuid]
+        delete this.vertices[quad.ABC.C.uuid]
+        delete this.vertices[quad.DEF.A.uuid]
+        delete this.vertices[quad.DEF.B.uuid]
+        delete this.vertices[quad.DEF.C.uuid]
     }
 
     optimize() {
         //
     }
 
-    calculateData() {
-        if (!this.dirty) {
-            return
-        }
+    calculateData(): GeometryGeneratorData {
+        if (!this.dirty && this._data) return this._data
+        
         this.optimize()
         const vertices = Object.values(this.vertices)
         const count = vertices.length
@@ -201,48 +207,36 @@ export default class GeometryGenerator {
         }
 
         this.dirty = false
+
+        return this._data
     }
 
     get count() {
-        this.calculateData()
-
-        return this._data!.count
+        return this.calculateData().count
     }
 
     get positions() {
-        this.calculateData()
-
-        return this._data!.positions
+        return this.calculateData().positions
     }
 
     get normals() {
-        this.calculateData()
-
-        return this._data!.normals
+        return this.calculateData().normals
     }
 
     get indices() {
-        this.calculateData()
-
-        return this._data!.indices
+        return this.calculateData().indices
     }
 
     get faceIndices() {
-        this.calculateData()
-
-        return this._data!.faceIndices
+        return this.calculateData().faceIndices
     }
 
     get uvs() {
-        this.calculateData()
-
-        return this._data!.uvs
+        return this.calculateData().uvs
     }
 
     get colors() {
-        this.calculateData()
-
-        return this._data!.colors
+        return this.calculateData().colors
     }
 
     destroy() {
