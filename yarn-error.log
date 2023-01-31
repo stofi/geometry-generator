@@ -1,0 +1,65 @@
+Arguments: 
+  /home/kurishutofu/.nvm/versions/node/v18.12.1/bin/node /home/kurishutofu/.nvm/versions/node/v18.12.1/bin/yarn add seed-random
+
+PATH: 
+  /home/kurishutofu/.local/share/pnpm:/home/kurishutofu/google-cloud-sdk/bin:/home/kurishutofu/miniconda3/bin:/home/kurishutofu/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/home/kurishutofu/anaconda3/bin:/home/kurishutofu/.local/share/pnpm:/home/kurishutofu/google-cloud-sdk/bin:/home/kurishutofu/miniconda3/bin:/home/kurishutofu/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/home/kurishutofu/anaconda3/bin:/home/kurishutofu/.nvm/versions/node/v18.12.1/bin:/home/kurishutofu/.local/bin:/home/kurishutofu/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/home/kurishutofu/.yarn/bin:~/bin:~/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.12.1
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: ENOENT: no such file or directory, copyfile '/home/kurishutofu/.cache/yarn/v6/npm-escape-string-regexp-4.0.0-14ba83a5d373e3d311e5afca29cf5bfad965bf34-integrity/node_modules/escape-string-regexp/index.d.ts' -> '/home/kurishutofu/Code/Fun/game-module/node_modules/eslint/node_modules/escape-string-regexp/index.d.ts'
+
+npm manifest: 
+  {
+    "name": "game-module",
+    "author": "kurishutofu",
+    "description": "game module",
+    "private": false,
+    "license": "MIT",
+    "version": "0.1.1",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "scripts": {
+      "build": "tsup index.ts --format cjs,esm --dts",
+      "lint": "tsc"
+    },
+    "devDependencies": {
+      "@changesets/cli": "^2.26.0",
+      "tsup": "^6.5.0",
+      "@types/crypto-js": "^4.1.1",
+      "@types/node": "^16.4.1",
+      "@types/three": "^0.148.1",
+      "@types/uuid": "^9.0.0",
+      "@typescript-eslint/eslint-plugin": "^5.49.0",
+      "@typescript-eslint/parser": "^5.49.0",
+      "eslint": "^8.32.0",
+      "eslint-config-prettier": "^8.3.0",
+      "eslint-plugin-prettier": "^4.2.1",
+      "husky": "^8.0.1",
+      "lint-staged": "^12.4.3",
+      "nodemon": "^2.0.20",
+      "prettier": "^2.8.3",
+      "rimraf": "^3.0.2",
+      "ts-node": "^10.1.0",
+      "typescript": "^4.9.4"
+    },
+    "dependencies": {
+      "crypto-js": "^4.1.1",
+      "three": "^0.149.0",
+      "uuid": "^9.0.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
