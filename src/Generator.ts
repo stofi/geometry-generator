@@ -95,7 +95,8 @@ export default class GeometryGenerator {
         a: THREE.Vector3,
         b: THREE.Vector3,
         c: THREE.Vector3,
-        d: THREE.Vector3
+        d: THREE.Vector3,
+        uvs?: [THREE.Vector2, THREE.Vector2, THREE.Vector2, THREE.Vector2]
     ) {
         this.dirty = true
 
@@ -122,6 +123,15 @@ export default class GeometryGenerator {
         vertexD.faceIndex = this.faceCount
         vertexE.faceIndex = this.faceCount
         vertexF.faceIndex = this.faceCount
+
+        if (uvs) {
+            vertexA.uv = uvs[0]
+            vertexB.uv = uvs[1]
+            vertexC.uv = uvs[2]
+            vertexD.uv = uvs[0]
+            vertexE.uv = uvs[2]
+            vertexF.uv = uvs[3]
+        }
 
         const triangleABC = new Triangle(vertexA, vertexB, vertexC)
         const triangleDEF = new Triangle(vertexD, vertexE, vertexF)
