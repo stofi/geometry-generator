@@ -19,4 +19,23 @@ export default class Vertex {
     destroy() {
         //
     }
+
+  
+
+    static comparePosition(a: Vertex, b: Vertex) {
+        return a.position.equals(b.position)
+    }   
+
+    static compareNormal(a: Vertex, b: Vertex) {
+        return a.normal.equals(b.normal)
+    }
+
+    static compareUV(a: Vertex, b: Vertex) {
+        return a.uv.equals(b.uv)
+    }
+
+    static compare(a: Vertex, b: Vertex) {
+        return Vertex.comparePosition(a, b) && Vertex.compareNormal(a, b) && Vertex.compareUV(a, b)
+    }
+
 }

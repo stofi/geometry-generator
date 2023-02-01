@@ -122,29 +122,39 @@ export default class GeometryGenerator {
         const allVertices = [a1, a2, a3, a4, b1, b2, b3, b4]
 
         const [v1, v2] = sharedEdge
+        let quad: Quad | null = null
 
-        const otherVertices = allVertices.filter((v) => v !== v1 && v !== v2)
-
-
-        // there should be 4 other vertices
-        if (otherVertices.length !== 4) {
-            throw new Error('Quads must share an edge to join them')
+        const edgeHasVertex = ( vertex: Vertex) => {
+            return sharedEdge.some((v) => Vertex.comparePosition(v, vertex))
         }
 
-        const [v3, v4, v5, v6] = otherVertices as [Vertex, Vertex, Vertex, Vertex]
+        if (edgeHasVertex(a1) && edgeHasVertex(a2) && edgeHasVertex(b4) && edgeHasVertex(b3)) {
+             quad = this.addQuad(a2.position, a3.position, b4.position, b1.position)
+        }
 
-        const newVertexA = v3
-        const newVertexB = v4
-        const newVertexC = v5
-        const newVertexD = v3
-        const newVertexE = v5
-        const newVertexF = v6
+        if (edgeHasVertex(a2) && edgeHasVertex(a3) && edgeHasVertex(b1) && edgeHasVertex(b4)) {
+            quad = this.addQuad(a1.position, b2.position, b3.position, a4.position)
+        }
+
+        if (edgeHasVertex(a3) && edgeHasVertex(a4) && edgeHasVertex(b2) && edgeHasVertex(b1)) {
+            quad = this.addQuad(a1.position, a2.position, b3.position, b4.position)
+        }
+
+        if (edgeHasVertex(a1) && edgeHasVertex(a2) && edgeHasVertex(b4) && edgeHasVertex(b3)) {
+            quad = this.addQuad(b1.position, b2.position, a3.position, a4.position)
+        }
+
+       
+        if (quad === null) {
+            throw new Error('Could not join quads')
+        }
 
 
         this.removeQuad(a)
         this.removeQuad(b)
 
-        this.addQuad(newVertexA.position, newVertexB.position, newVertexC.position, newVertexF.position)
+
+        return quad
     }
 
     removeQuad(quad: Quad) {

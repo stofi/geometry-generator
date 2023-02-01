@@ -30,16 +30,6 @@ export default class Quad {
         return [this.ABC.A, this.ABC.B, this.ABC.C, this.DEF.C]
     }
 
-    
-    // static methods needed to join neighboring quads in the same plane
-    // static areNeighbors(a, b)
-    // static areInSamePlane(a, b)
-    // - must be planar and triangles must have same normals
-    // static sharedEdge(a, b)
-    // static sharedVertex(a, b)
-    // static join(a, b)
-    // ? figure out how to join uv coordinates
-
     static compareNormals(a: Quad, b: Quad) {
         return Triangle.compareNormals(a.ABC, b.ABC)
     }
@@ -53,6 +43,18 @@ export default class Quad {
     }
 
     static sharedEdges(a: Quad, b: Quad): Edge[] {
+        const compare = (a: Edge, b: Edge) => {
+            if (Vertex.comparePosition(a[0], b[0]) && Vertex.comparePosition(a[1], b[1])) {
+                return true
+            }
+
+            if (Vertex.comparePosition(a[0], b[1]) && Vertex.comparePosition(a[1], b[0])) {
+                return true
+            }
+
+            return false
+        }
+
         const aEdges:Edge[] = [
             [a.ABC.A, a.ABC.B],
             [a.ABC.B, a.ABC.C],
@@ -70,7 +72,7 @@ export default class Quad {
             [b.DEF.C, b.DEF.A]
         ]
 
-        const sharedEdges = aEdges.filter(edge => bEdges.includes(edge))
+        const sharedEdges = aEdges.filter(edge => bEdges.some(bEdge => compare(edge, bEdge)))
         return sharedEdges
     }
 
