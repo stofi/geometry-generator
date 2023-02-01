@@ -1,5 +1,11 @@
 # game-module
 
+## 0.1.0
+
+### Minor Changes
+
+- 7a4ea4e: Added quad join method.
+
 ## 0.0.3
 
 ### Patch Changes
