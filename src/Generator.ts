@@ -340,6 +340,10 @@ export default class GeometryGenerator {
         toJoin.forEach(([a, b]) => {
             this.join(a, b)
         })
+
+        toRemove.forEach((quad) => {
+            this.removeQuad(quad)
+        })
     }
 
     optimize(steps = 1) {
