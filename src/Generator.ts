@@ -242,6 +242,7 @@ export default class GeometryGenerator {
 
         return quad
     }
+
     canJoin(a: Quad, b: Quad): boolean {
         if (!Quad.areInSamePlane(a, b)) return false
 
@@ -288,8 +289,63 @@ export default class GeometryGenerator {
         delete this.vertices[quad.DEF.C.uuid]
     }
 
-    optimize() {
-        //
+    mergeAdjacentQuads() {
+        const quadsGroupedByPlane = Object.values(this.quads).reduce(
+            (acc, quad) => {
+                if (!quad.isPlanar) return acc
+                const normal = `${quad.normal.x} ${quad.normal.y} ${quad.normal.z}`
+                const sD = quad.signedDistance.toString()
+                const plane = `${normal} ${sD}`
+
+                if (!acc[plane]) acc[plane] = []
+                ;(acc[plane] as any).push(quad)
+                return acc
+            },
+            {} as { [key: string]: Quad[] }
+        )
+
+        const toJoin: [Quad, Quad][] = []
+        const toRemove: Quad[] = []
+        Object.values(quadsGroupedByPlane).forEach((quads) => {
+            // for each pair of quads, try to join them
+            for (let i = 0; i < quads.length; i++) {
+                const quad = quads[i]
+                if (!quad) continue
+                if (toRemove.includes(quad)) continue
+                if (toJoin.some(([a, b]) => a === quad || b === quad)) continue
+
+                for (let j = i + 1; j < quads.length; j++) {
+                    const other = quads[j]
+                    if (!other) continue
+                    if (toRemove.includes(other)) continue
+                    if (
+                        toJoin.some(
+                            ([a, b]) =>
+                                a === quad ||
+                                a === other ||
+                                b === quad ||
+                                b === other
+                        )
+                    )
+                        continue
+
+                    if (this.canJoin(quad, other)) {
+                        toJoin.push([quad, other])
+                        toRemove.push(other, quad)
+                    }
+                }
+            }
+        })
+
+        toJoin.forEach(([a, b]) => {
+            this.join(a, b)
+        })
+    }
+
+    optimize(steps = 1) {
+        for (let i = 0; i < steps; i++) {
+            this.mergeAdjacentQuads()
+        }
     }
 
     calculateData(): GeometryGeneratorData {

@@ -1,5 +1,11 @@
 # game-module
 
+## 0.1.2
+
+### Patch Changes
+
+-   Add optimization.
+
 ## 0.1.1
 
 ### Patch Changes

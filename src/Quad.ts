@@ -21,6 +21,14 @@ export default class Quad {
         this.DEF.destroy()
     }
 
+    get normal() {
+        return this.ABC.normal
+    }
+
+    get signedDistance() {
+        return this.ABC.signedDistance
+    }
+
     get isPlanar() {
         return Triangle.compareNormals(this.ABC, this.DEF) === 1
     }

@@ -28,6 +28,15 @@ export default class Triangle {
         return normal
     }
 
+    get signedDistance() {
+        const a = this.A.position
+        const b = this.B.position
+        const c = this.C.position
+        const normal = this.normal
+        const signedDistance = -normal.dot(a)
+        return signedDistance
+    }
+
     destroy() {
         this.A.destroy()
         this.B.destroy()
