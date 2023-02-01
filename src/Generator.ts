@@ -23,6 +23,8 @@ export default class GeometryGenerator {
     faceCount = 0
     _data: GeometryGeneratorData | null = null
 
+    optimizeSteps = 0
+
     addTriangle(
         a: THREE.Vector3,
         b: THREE.Vector3,
@@ -355,7 +357,7 @@ export default class GeometryGenerator {
     calculateData(): GeometryGeneratorData {
         if (this._data) return this._data
 
-        this.optimize(1)
+        this.optimize(this.optimizeSteps)
         const vertices = Object.values(this.vertices)
         const count = vertices.length
         const colors = new Float32Array(count * 3)
