@@ -19,7 +19,7 @@ export default class GeometryGenerator {
     vertices: Record<string, Vertex> = {}
     triangles: Record<string, Triangle> = {}
     quads: Record<string, Quad> = {}
-    dirty = false
+
     faceCount = 0
     _data: GeometryGeneratorData | null = null
 
@@ -28,7 +28,7 @@ export default class GeometryGenerator {
         b: THREE.Vector3,
         c: THREE.Vector3
     ): Triangle {
-        this.dirty = true
+        this._data = null
         const normal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
 
         const vertexA = new Vertex(a, normal)
@@ -53,7 +53,7 @@ export default class GeometryGenerator {
         d: THREE.Vector3,
         uvs?: [THREE.Vector2, THREE.Vector2, THREE.Vector2, THREE.Vector2]
     ): Quad {
-        this.dirty = true
+        this._data = null
 
         const normal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
 
@@ -277,7 +277,7 @@ export default class GeometryGenerator {
     }
 
     removeQuad(quad: Quad) {
-        this.dirty = true
+        this._data = null
         delete this.quads[quad.uuid]
         delete this.triangles[quad.ABC.uuid]
         delete this.triangles[quad.DEF.uuid]
@@ -349,9 +349,9 @@ export default class GeometryGenerator {
     }
 
     calculateData(): GeometryGeneratorData {
-        if (!this.dirty && this._data) return this._data
+        if (this._data) return this._data
 
-        this.optimize()
+        this.optimize(1)
         const vertices = Object.values(this.vertices)
         const count = vertices.length
         const colors = new Float32Array(count * 3)
@@ -389,8 +389,6 @@ export default class GeometryGenerator {
             count,
             faceIndices,
         }
-
-        this.dirty = false
 
         return this._data
     }
