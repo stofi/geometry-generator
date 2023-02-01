@@ -20,11 +20,9 @@ export default class Vertex {
         //
     }
 
-  
-
     static comparePosition(a: Vertex, b: Vertex) {
         return a.position.equals(b.position)
-    }   
+    }
 
     static compareNormal(a: Vertex, b: Vertex) {
         return a.normal.equals(b.normal)
@@ -35,7 +33,10 @@ export default class Vertex {
     }
 
     static compare(a: Vertex, b: Vertex) {
-        return Vertex.comparePosition(a, b) && Vertex.compareNormal(a, b) && Vertex.compareUV(a, b)
+        return (
+            Vertex.comparePosition(a, b) &&
+            Vertex.compareNormal(a, b) &&
+            Vertex.compareUV(a, b)
+        )
     }
-
 }

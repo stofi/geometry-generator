@@ -5,7 +5,6 @@ import Quad from './Quad'
 import Triangle from './Triangle'
 import Vertex from './Vertex'
 
-
 interface GeometryGeneratorData {
     positions: Float32Array
     normals: Float32Array
@@ -24,7 +23,11 @@ export default class GeometryGenerator {
     faceCount = 0
     _data: GeometryGeneratorData | null = null
 
-    addTriangle(a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3): Triangle {
+    addTriangle(
+        a: THREE.Vector3,
+        b: THREE.Vector3,
+        c: THREE.Vector3
+    ): Triangle {
         this.dirty = true
         const normal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
 
@@ -119,42 +122,157 @@ export default class GeometryGenerator {
         const [a1, a2, a3, a4] = a.vertices
         const [b1, b2, b3, b4] = b.vertices
 
-        const allVertices = [a1, a2, a3, a4, b1, b2, b3, b4]
-
-        const [v1, v2] = sharedEdge
         let quad: Quad | null = null
 
-        const edgeHasVertex = ( vertex: Vertex) => {
+        const edgeHasVertex = (vertex: Vertex) => {
             return sharedEdge.some((v) => Vertex.comparePosition(v, vertex))
         }
 
-        if (edgeHasVertex(a1) && edgeHasVertex(a2) && edgeHasVertex(b4) && edgeHasVertex(b3)) {
-             quad = this.addQuad(a2.position, a3.position, b4.position, b1.position)
+        /**
+         * a4 a3
+         * a1 a2
+         */
+
+        if (
+            edgeHasVertex(a1) &&
+            edgeHasVertex(a2) &&
+            edgeHasVertex(b4) &&
+            edgeHasVertex(b3)
+        ) {
+            /**
+             * b4 (b3 a4) a3
+             * b1 (b2 a1) a2
+             */
+            quad = this.addQuad(
+                a2.position,
+                a3.position,
+                b4.position,
+                b1.position,
+                [
+                    a2.uv.add(new THREE.Vector2(b2.uv.x, 0)),
+                    a3.uv.add(new THREE.Vector2(b3.uv.x, 0)),
+                    b4.uv,
+                    b1.uv,
+                ]
+            )
         }
 
-        if (edgeHasVertex(a2) && edgeHasVertex(a3) && edgeHasVertex(b1) && edgeHasVertex(b4)) {
-            quad = this.addQuad(a1.position, b2.position, b3.position, a4.position)
+        if (
+            edgeHasVertex(a2) &&
+            edgeHasVertex(a3) &&
+            edgeHasVertex(b1) &&
+            edgeHasVertex(b4)
+        ) {
+            /**
+             * a4 (a3 b4) b3
+             * a1 (a2 b1) b2
+             */
+            quad = this.addQuad(
+                a1.position,
+                b2.position,
+                b3.position,
+                a4.position,
+                [
+                    a1.uv,
+                    b2.uv.add(new THREE.Vector2(a2.uv.x, 0)),
+                    b3.uv.add(new THREE.Vector2(a3.uv.x, 0)),
+                    a4.uv,
+                ]
+            )
         }
 
-        if (edgeHasVertex(a3) && edgeHasVertex(a4) && edgeHasVertex(b2) && edgeHasVertex(b1)) {
-            quad = this.addQuad(a1.position, a2.position, b3.position, b4.position)
+        if (
+            edgeHasVertex(a3) &&
+            edgeHasVertex(a4) &&
+            edgeHasVertex(b2) &&
+            edgeHasVertex(b1)
+        ) {
+            /**
+             *  b4 b3
+             * (b1 b2)
+             * (a4 a3)
+             *  a1 a2
+             */
+            quad = this.addQuad(
+                a1.position,
+                a2.position,
+                b3.position,
+                b4.position,
+                [
+                    a1.uv,
+                    a2.uv,
+                    b3.uv.add(new THREE.Vector2(0, a3.uv.y)),
+                    b4.uv.add(new THREE.Vector2(0, a4.uv.y)),
+                ]
+            )
         }
 
-        if (edgeHasVertex(a1) && edgeHasVertex(a2) && edgeHasVertex(b4) && edgeHasVertex(b3)) {
-            quad = this.addQuad(b1.position, b2.position, a3.position, a4.position)
+        if (
+            edgeHasVertex(a1) &&
+            edgeHasVertex(a2) &&
+            edgeHasVertex(b4) &&
+            edgeHasVertex(b3)
+        ) {
+            /**
+             *  a4 a3
+             * (a1 a2)
+             * (b4 b3)
+             *  b1 b2
+             */
+            quad = this.addQuad(
+                b1.position,
+                b2.position,
+                a3.position,
+                a4.position,
+                [
+                    b1.uv,
+                    b2.uv,
+                    a3.uv.add(new THREE.Vector2(0, b3.uv.y)),
+                    a4.uv.add(new THREE.Vector2(0, b4.uv.y)),
+                ]
+            )
         }
 
-       
         if (quad === null) {
             throw new Error('Could not join quads')
         }
 
-
         this.removeQuad(a)
         this.removeQuad(b)
 
-
         return quad
+    }
+    canJoin(a: Quad, b: Quad): boolean {
+        if (!Quad.areInSamePlane(a, b)) return false
+
+        const sharedEdge = Quad.sharedEdge(a, b)
+        if (sharedEdge === null) return false
+
+        const [a1, a2, a3, a4] = a.vertices
+        const [b1, b2, b3, b4] = b.vertices
+
+        const edgeHasVertex = (vertex: Vertex) => {
+            return sharedEdge.some((v) => Vertex.comparePosition(v, vertex))
+        }
+
+        return (
+            (edgeHasVertex(a1) &&
+                edgeHasVertex(a2) &&
+                edgeHasVertex(b4) &&
+                edgeHasVertex(b3)) ||
+            (edgeHasVertex(a2) &&
+                edgeHasVertex(a3) &&
+                edgeHasVertex(b1) &&
+                edgeHasVertex(b4)) ||
+            (edgeHasVertex(a3) &&
+                edgeHasVertex(a4) &&
+                edgeHasVertex(b2) &&
+                edgeHasVertex(b1)) ||
+            (edgeHasVertex(a1) &&
+                edgeHasVertex(a2) &&
+                edgeHasVertex(b4) &&
+                edgeHasVertex(b3))
+        )
     }
 
     removeQuad(quad: Quad) {
@@ -176,7 +294,7 @@ export default class GeometryGenerator {
 
     calculateData(): GeometryGeneratorData {
         if (!this.dirty && this._data) return this._data
-        
+
         this.optimize()
         const vertices = Object.values(this.vertices)
         const count = vertices.length

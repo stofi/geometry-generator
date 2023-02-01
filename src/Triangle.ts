@@ -39,5 +39,4 @@ export default class Triangle {
         const bNormal = b.normal
         return aNormal.dot(bNormal)
     }
-    
 }
