@@ -15,6 +15,9 @@ export default class Quad {
         this.ABC.setColor(color)
         this.DEF.setColor(color)
     }
+    get color() {
+        return this.ABC.color
+    }
 
     destroy() {
         this.ABC.destroy()

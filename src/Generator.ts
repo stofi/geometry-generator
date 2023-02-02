@@ -232,6 +232,7 @@ export default class GeometryGenerator {
         if (quad === null) {
             throw new Error('Could not join quads')
         }
+        quad.setColor(a.color)
 
         this.removeQuad(a)
         this.removeQuad(b)
@@ -339,7 +340,7 @@ export default class GeometryGenerator {
         })
 
         toJoin.forEach(([a, b]) => {
-            this.join(a, b)
+            const q = this.join(a, b)
         })
 
         toRemove.forEach((quad) => {

@@ -16,6 +16,9 @@ export default class Triangle {
         this.B.setColor(color)
         this.C.setColor(color)
     }
+    get color() {
+        return this.A.color
+    }
 
     get normal() {
         const a = this.A.position
