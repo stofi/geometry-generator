@@ -137,8 +137,8 @@ export default class GeometryGenerator {
 
         if (
             edgeHasVertex(a1) &&
-            edgeHasVertex(a2) &&
-            edgeHasVertex(b4) &&
+            edgeHasVertex(a4) &&
+            edgeHasVertex(b2) &&
             edgeHasVertex(b3)
         ) {
             /**
@@ -157,9 +157,7 @@ export default class GeometryGenerator {
                     b1.uv,
                 ]
             )
-        }
-
-        if (
+        } else if (
             edgeHasVertex(a2) &&
             edgeHasVertex(a3) &&
             edgeHasVertex(b1) &&
@@ -181,9 +179,7 @@ export default class GeometryGenerator {
                     a4.uv,
                 ]
             )
-        }
-
-        if (
+        } else if (
             edgeHasVertex(a3) &&
             edgeHasVertex(a4) &&
             edgeHasVertex(b2) &&
@@ -207,9 +203,7 @@ export default class GeometryGenerator {
                     b4.uv.add(new THREE.Vector2(0, a4.uv.y)),
                 ]
             )
-        }
-
-        if (
+        } else if (
             edgeHasVertex(a1) &&
             edgeHasVertex(a2) &&
             edgeHasVertex(b4) &&
@@ -314,7 +308,12 @@ export default class GeometryGenerator {
                 const quad = quads[i]
                 if (!quad) continue
                 if (toRemove.includes(quad)) continue
-                if (toJoin.some(([a, b]) => a === quad || b === quad)) continue
+                if (
+                    toJoin.some(
+                        ([a, b]) => a.uuid === quad.uuid || b.uuid === quad.uuid
+                    )
+                )
+                    continue
 
                 for (let j = i + 1; j < quads.length; j++) {
                     const other = quads[j]
@@ -323,10 +322,10 @@ export default class GeometryGenerator {
                     if (
                         toJoin.some(
                             ([a, b]) =>
-                                a === quad ||
-                                a === other ||
-                                b === quad ||
-                                b === other
+                                a.uuid === quad.uuid ||
+                                a.uuid === other.uuid ||
+                                b.uuid === quad.uuid ||
+                                b.uuid === other.uuid
                         )
                     )
                         continue
