@@ -1,5 +1,11 @@
 # game-module
 
+## 0.1.8
+
+### Patch Changes
+
+-   add uvs to triangles
+
 ## 0.1.7
 
 ### Patch Changes

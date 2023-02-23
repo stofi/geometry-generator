@@ -28,7 +28,8 @@ export default class GeometryGenerator {
     addTriangle(
         a: THREE.Vector3,
         b: THREE.Vector3,
-        c: THREE.Vector3
+        c: THREE.Vector3,
+        uvs?: [THREE.Vector2, THREE.Vector2, THREE.Vector2]
     ): Triangle {
         this._data = null
         const normal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
@@ -36,6 +37,18 @@ export default class GeometryGenerator {
         const vertexA = new Vertex(a, normal)
         const vertexB = new Vertex(b, normal)
         const vertexC = new Vertex(c, normal)
+        vertexA.uv = new THREE.Vector2(0, 0)
+        vertexB.uv = new THREE.Vector2(1, 0)
+        vertexC.uv = new THREE.Vector2(1, 1)
+        vertexA.faceIndex = this.faceCount
+        vertexB.faceIndex = this.faceCount
+        vertexC.faceIndex = this.faceCount
+
+        if (uvs) {
+            vertexA.uv = uvs[0]
+            vertexB.uv = uvs[1]
+            vertexC.uv = uvs[2]
+        }
 
         const triangle = new Triangle(vertexA, vertexB, vertexC)
 
@@ -45,6 +58,7 @@ export default class GeometryGenerator {
 
         this.triangles[triangle.uuid] = triangle
 
+        this.faceCount += 1
         return triangle
     }
 
